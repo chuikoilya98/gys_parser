@@ -1,6 +1,3 @@
-from cgitb import reset
-from unittest import result
-from parso import parse
 import requests
 import json
 from bs4 import BeautifulSoup
