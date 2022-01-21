@@ -5,6 +5,14 @@ import json
 from bs4 import BeautifulSoup
 import os.path as pt
 import re
+from db import Database
+from bot import Bot
+
+
+"""
+При добавлении нового магазина, после написания функции под получение данных, 
+нужно указать ее вызов в функции start
+"""
 
 
 class Parser():
@@ -12,8 +20,14 @@ class Parser():
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36'
     }
 
+    def executeItems(self, data: dict):
+        executor = Database()
+
+        executor.createItemsFromDict(items=data)
+
+        return True
+
     def sneakerhead(self) -> dict:
-        print('snakerhead')
         url = 'https://sneakerhead.ru/sale/shoes/sneakers/'
         html = requests.get(url, headers=self.headers)
         html.encoding = 'utf-8'
@@ -89,10 +103,7 @@ class Parser():
                 'text': '',
                         'items': finalItems
             }
-
-            with open(pt.abspath('sssstest.json'), 'w') as file:
-                info = json.dumps(result)
-                file.write(info)
+            self.executeItems(data=result)
             return result
         else:
             result = {
@@ -103,7 +114,6 @@ class Parser():
             return result
 
     def sneakerstreet(self) -> dict:
-        print('sneakerstreet')
         url = 'https://sneaker-street.ru/specials?bfilter=c0%3A127&limit=240'
         html = requests.get(url, headers=self.headers)
         html.encoding = 'utf-8'
@@ -163,9 +173,7 @@ class Parser():
                 'items': finalItems
             }
 
-            with open(pt.abspath('sssstest.json'), 'w') as file:
-                info = json.dumps(result)
-                file.write(info)
+            self.executeItems(data=result)
             return result
         else:
             result = {
@@ -176,8 +184,6 @@ class Parser():
             return result
 
     def superstep(self) -> dict:
-        print('superstep')
-        # TODO: добавить обработку статусов запросов
         url = 'https://superstep.ru/sale/?arrFilter_29_3839122159=Y&set_filter=Y&arrFilter_29_1536390870=Y&PAGEN_1=100'
         html = requests.get(url, headers=self.headers)
         html.encoding = 'utf-8'
@@ -244,13 +250,10 @@ class Parser():
             'items': finalItems
         }
 
-        with open(pt.abspath('sssstest.json'), 'w') as file:
-            info = json.dumps(result)
-            file.write(info)
+        self.executeItems(data=result)
         return result
 
     def urbanVibes(self) -> dict:
-        print('urbanVibes')
         url = 'https://urbanvibes.com/api/catalog/skidki/'
         result = requests.get(url)
         if result.status_code == 200:
@@ -266,6 +269,7 @@ class Parser():
                             sizes.append(size['size'])
                         else:
                             continue
+                    link = f'https://urbanvibes.com/product/'+item['id']
                     product = {
                         'source': 'urbanvibes',
                         'id': item['id'],
@@ -274,7 +278,8 @@ class Parser():
                         'oldPrice': item['oldPrice'],
                         'brand': item['brand'],
                         'image': item['image'],
-                        'sizes': sizes
+                        'sizes': sizes,
+                        'link': link
                     }
                     products.append(product)
                 else:
@@ -284,9 +289,7 @@ class Parser():
                 'text': '',
                 'items': products
             }
-            with open(pt.abspath('test.json'), 'w') as file:
-                info = json.dumps(result)
-                file.write(info)
+            self.executeItems(data=result)
             return result
         else:
             result = {
@@ -298,18 +301,21 @@ class Parser():
 
     def start(self) -> dict:
         shops = {
-            'urbanVibes': self.urbanVibes(),
             'sneakerhead': self.sneakerhead(),
             'sneakerstreet': self.sneakerstreet(),
             'superstep': self.superstep(),
+            'urbanVibes': self.urbanVibes()
         }
         result = {
             'success': True,
             'text': 'Получение данных с сайтов прошло успешно'
         }
-        print(result)
+
+        bot = Bot()
+        bot.sendAdminMessage(result['text'])
+
         return result
 
 
-k = Parser()
-k.startParsing()
+if __name__ == "__main__":
+    Parser.start()

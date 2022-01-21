@@ -8,9 +8,7 @@ from unittest import result
 
 #cursor = conn.cursor()
 
-"""CREATE TABLE sneakers
-source text, id text, name text, brand text, price text, oldprice text, image text, sizes text, link text , executed text, dateexecuted text, dateadd text)
-"""
+#cursor.execute("""CREATE TABLE sneakers (source text, id text, name text, brand text, price text, oldprice text, image text, sizes text, link text , executed text, dateexecuted text, dateadd text)""")
 
 
 class Database():
@@ -33,18 +31,19 @@ class Database():
                 continue
             else:
                 dateAdd = str(datetime.now())
+                name = item['name'].remove("'")
                 sizes = ''
                 for size in item['sizes']:
                     sizes += size
-                    sizes += ', '
+                    sizes += ' '
                 query = f"""
             INSERT INTO sneakers
-            VALUES ('{item['source']}', '{item['id']}', '{item['name']}', '{item['brand']}', '{item['price']}', '{item['oldPrice']}', '{item['image']}', '{sizes}', '1', 'N' , '0' , '{dateAdd}')
+            VALUES ('{item['source']}', '{item['id']}', '{name}', '{item['brand']}', '{item['price']}', '{item['oldPrice']}', '{item['image']}', '{sizes}', '{item['link']}', 'N' , '0' , '{dateAdd}')
             """
                 cursor.execute(query)
                 conn.commit()
 
-    def getNonExecutedItems(self, count=10, brand=None) -> dict:
+    def getNonExecutedItems(self, count=1, brand=None) -> dict:
         conn = sqlite3.connect(pt.abspath("database.db"))
         cursor = conn.cursor()
         query = """
@@ -56,12 +55,33 @@ class Database():
 
         for i in range(count):
             result.append(data[i])
-        print(result)
+        products = []
+        for item in result:
+            product = {
+                'source': item[0],
+                'id': item[1],
+                'name': item[2],
+                'brand': item[3],
+                'price': item[4],
+                'oldPrice': item[5],
+                'image': item[6],
+                'sizes': item[7],
+                'link': item[8],
+            }
+            products.append(product)
+            conn = sqlite3.connect(pt.abspath("database.db"))
+            cursor = conn.cursor()
+            sql = f"""UPDATE sneakers
+            SET executed = 'Y', dateexecuted = '{str(datetime.now())}'
+            WHERE id = '{item[1]}'
+            """
+            cursor.execute(sql)
+            conn.commit()
 
+        final = {
+            'success': True,
+            'count': count,
+            'items': products
+        }
 
-k = Database()
-
-with open(pt.abspath('test.json'), 'r') as file:
-    data = json.load(file)
-    # k.createItemsFromDict(items=data)
-    k.getNonExecutedItems()
+        return final
