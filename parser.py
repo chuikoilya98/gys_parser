@@ -1,5 +1,6 @@
 from cgitb import reset
 from unittest import result
+from parso import parse
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -318,4 +319,5 @@ class Parser():
 
 
 if __name__ == "__main__":
-    Parser.start()
+    parser = Parser()
+    parser.start()
