@@ -31,7 +31,7 @@ class Database():
                 continue
             else:
                 dateAdd = str(datetime.now())
-                name = item['name'].remove("'")
+                name = item['name'].replace("'", ' ')
                 sizes = ''
                 for size in item['sizes']:
                     sizes += size
