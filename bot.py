@@ -12,9 +12,9 @@ class Bot():
         methodName = '/sendPhoto'
 
         text = f"""
-       <b>{item['name']}</b>
+       🔥<b>{item['name']}</b>🔥
 
-{item['oldPrice']} -> {item['price']}
+{item['oldPrice']} → {item['price']}
 
 {item['sizes']}
 
