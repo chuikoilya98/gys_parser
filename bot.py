@@ -1,5 +1,5 @@
 import requests
-
+import json
 
 class Bot():
 
@@ -22,15 +22,17 @@ class Bot():
 
 <a href='{item['link']}'>Купить</a>
        """
-
+        reply = json.dumps({'inline_keyboard': [[{'text': 'Купить', 'url': item['link']}]]})
         params = {
             'chat_id': self.CHAT,
             'photo': item['image'],
             'caption': text,
-            'parse_mode': 'HTML'
+            'parse_mode': 'HTML',
+            'reply_markup' : reply
         }
         url = self.URL + self.TOKEN + methodName
         req = requests.get(url, params=params)
+        print(req.content)
 
         return True
 
@@ -43,5 +45,7 @@ class Bot():
         }
         url = self.URL + self.TOKEN + methodName
         req = requests.get(url, params=params)
-
         return True
+
+k = Bot()
+
