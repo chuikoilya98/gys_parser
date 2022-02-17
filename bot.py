@@ -20,7 +20,6 @@ class Bot():
 
 Найдено на {item['source']}
 
-<a href='{item['link']}'>Купить</a>
        """
         reply = json.dumps({'inline_keyboard': [[{'text': 'Купить', 'url': item['link']}]]})
         params = {
@@ -32,7 +31,6 @@ class Bot():
         }
         url = self.URL + self.TOKEN + methodName
         req = requests.get(url, params=params)
-        print(req.content)
 
         return True
 
